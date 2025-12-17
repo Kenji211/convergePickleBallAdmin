@@ -1,165 +1,116 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarSeparator,
-  SidebarFooter,
-  SidebarTrigger,
-} from "../../components/ui/sidebar";
+  CalendarDays,
+  PhilippinePeso,
+  Activity,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChartAreaInteractive } from "@/components/dashboard/chart-area";
 
-export default function AdminHome() {
-  const stats = [
-    { label: "Active Bookings", value: 12 },
-    { label: "Available Courts", value: 3 },
-    { label: "Members Online", value: 5 },
-  ];
-
-  const upcoming = [
-    { time: "09:00", court: "Court 1", by: "Alice" },
-    { time: "10:30", court: "Court 3", by: "Group B" },
-    { time: "12:00", court: "Court 2", by: "Bob" },
+export default function DashboardPage() {
+  const todayBookings = [
+    { id: 1, name: "John Doe", court: "Court 1", time: "9:00 – 10:00 AM", status: "Booked" },
+    { id: 2, name: "Jane Smith", court: "Court 2", time: "10:30 – 11:30 AM", status: "Booked" },
+    { id: 3, name: "Court 3", court: "Court 3", time: "12:00 – 1:00 PM", status: "Available" },
   ];
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6">
-            <div className="hidden md:block">
-              <Sidebar side="left" variant="sidebar" collapsible="offcanvas">
-                <SidebarContent>
-                  <SidebarHeader>
-                    <div className="text-sm font-semibold">Admin</div>
-                  </SidebarHeader>
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/dashboard">Overview</Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+    <div className="p-4 space-y-6">
+      {/* Header */}
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Pickleball Admin Dashboard</h1>
+        <p className="text-sm text-zinc-600 dark:text-zinc-300">
+          Overview of bookings, courts, and revenue.
+        </p>
+      </header>
 
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/dashboard/bookings">Bookings</Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+      {/* Stats */}
+      <section className="grid gap-4 grid-cols-2 lg:grid-cols-4 auto-rows-fr">
+        <StatCard title="Today’s Bookings" value="18" icon={<CalendarDays className="h-5 w-5" />} />
+        <StatCard title="Monthly Revenue" value="₱12,450" icon={<PhilippinePeso className="h-5 w-5" />} />
+        <StatCard title="Active Courts" value="3 / 4" icon={<Activity className="h-5 w-5" />} />
+        <StatCard title="Unique Players" value="126" icon={<Users className="h-5 w-5" />} />
+      </section>
 
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/dashboard/courts">Courts</Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+      {/* Today's Bookings Panel */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-4 sm:p-6">
+          {/* Date Navigation */}
+          <div className="flex items-center justify-between border-b pb-4 mb-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon">
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
 
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <Link href="/dashboard/settings">Settings</Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                  <SidebarSeparator />
-                </SidebarContent>
-              </Sidebar>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-blue-600" />
+                Today’s Bookings
+                {/* shoud be date today */}
+              </h2>
+
+              <Button variant="ghost" size="icon">
+                <ChevronRight className="h-5 w-5" />
+              </Button>
             </div>
 
-            <main>
-              <header className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="md:hidden">
-                    <SidebarTrigger />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-semibold">Converge Pickleball — Admin</h1>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-300">Overview of bookings, courts, and quick actions.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost">Settings</Button>
-                  <Button onClick={() => (window.location.href = "/")}>Sign out</Button>
-                </div>
-              </header>
-
-              <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {stats.map((s) => (
-                  <Card key={s.label}>
-                    <div className="px-6 py-5">
-                      <div className="text-sm text-zinc-500">{s.label}</div>
-                      <div className="mt-2 text-2xl font-semibold">{s.value}</div>
-                    </div>
-                  </Card>
-                ))}
-              </section>
-
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <Card>
-                  <div className="p-6">
-                    <h2 className="text-lg font-medium mb-3">Upcoming bookings</h2>
-                    <div className="space-y-3">
-                      {upcoming.map((u, i) => (
-                        <div key={i} className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium">{u.time} — {u.court}</div>
-                            <div className="text-xs text-zinc-500">{u.by}</div>
-                          </div>
-                          <div className="text-xs text-zinc-400">View</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-
-                <Card>
-                  <div className="p-6 flex flex-col h-full">
-                    <h2 className="text-lg font-medium mb-3">Quick actions</h2>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm mb-1">Create booking</label>
-                        <Input placeholder="Member email or name" />
-                      </div>
-                      <div className="flex gap-2 mt-2">
-                        <Button>Create</Button>
-                        <Button variant="outline">Bulk import</Button>
-                      </div>
-                      <div className="mt-4 text-xs text-zinc-500">Need help? Contact support at support@convergepickleball.com</div>
-                    </div>
-                  </div>
-                </Card>
-              </section>
-
-              <Card className="mt-6">
-                <div className="p-6">
-                  <h2 className="text-lg font-medium mb-3">Court availability</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3 bg-zinc-100 dark:bg-zinc-900 rounded">
-                      <div className="text-sm">Court 1</div>
-                      <div className="text-xs text-zinc-500">Next free: 11:00</div>
-                    </div>
-                    <div className="p-3 bg-zinc-100 dark:bg-zinc-900 rounded">
-                      <div className="text-sm">Court 2</div>
-                      <div className="text-xs text-zinc-500">Next free: 12:30</div>
-                    </div>
-                    <div className="p-3 bg-zinc-100 dark:bg-zinc-900 rounded">
-                      <div className="text-sm">Court 3</div>
-                      <div className="text-xs text-zinc-500">Next free: 09:45</div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </main>
+            <Button size="sm"
+            >
+              Go to Today
+            </Button>
           </div>
-        </div>
+
+          {/* Booking List */}
+          <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
+            {todayBookings.map((booking) => (
+              <BookingItem key={booking.id} booking={booking} />
+            ))}
+          </div>
+        </Card>
+        <ChartAreaInteractive/>
+      </section>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+  return (
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium">
+          {title}
+        </CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function BookingItem({ booking }: { booking: any }) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg border bg-zinc-50 dark:bg-zinc-800">
+      <div>
+        <p className="font-medium">{booking.court}</p>
+        <p className="text-sm text-zinc-500">
+          {booking.time} • {booking.name}
+        </p>
       </div>
-    </SidebarProvider>
+
+      <span
+        className={`px-3 py-1 text-xs font-semibold rounded-full ${booking.status === "Booked"
+          ? "bg-red-100 text-red-700"
+          : "bg-green-100 text-green-700"
+          }`}
+      >
+        {booking.status}
+      </span>
+    </div>
   );
 }
