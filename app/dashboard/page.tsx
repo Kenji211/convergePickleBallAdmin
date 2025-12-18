@@ -1,116 +1,79 @@
 "use client";
 
-import {
-  CalendarDays,
-  PhilippinePeso,
-  Activity,
-  Users,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ChartAreaInteractive } from "@/components/dashboard/chart-area";
+import { BookingCalendar } from "@/components/dashboard/booked-calendar";
+import { TransactionList } from "@/components/dashboard/dynamicList";
+import { AnimatedBackground } from "@/components/dashboard/animatedBg";
 
 export default function DashboardPage() {
-  const todayBookings = [
-    { id: 1, name: "John Doe", court: "Court 1", time: "9:00 – 10:00 AM", status: "Booked" },
-    { id: 2, name: "Jane Smith", court: "Court 2", time: "10:30 – 11:30 AM", status: "Booked" },
-    { id: 3, name: "Court 3", court: "Court 3", time: "12:00 – 1:00 PM", status: "Available" },
-  ];
+  const [selectedDate, setSelectedDate] = React.useState<string | null>(null);
+  const [search, setSearch] = React.useState("");
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Header */}
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Pickleball Admin Dashboard</h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-300">
-          Overview of bookings, courts, and revenue.
-        </p>
-      </header>
+    <div className="p-6 space-y-6">
 
-      {/* Stats */}
-      <section className="grid gap-4 grid-cols-2 lg:grid-cols-4 auto-rows-fr">
-        <StatCard title="Today’s Bookings" value="18" icon={<CalendarDays className="h-5 w-5" />} />
-        <StatCard title="Monthly Revenue" value="₱12,450" icon={<PhilippinePeso className="h-5 w-5" />} />
-        <StatCard title="Active Courts" value="3 / 4" icon={<Activity className="h-5 w-5" />} />
-        <StatCard title="Unique Players" value="126" icon={<Users className="h-5 w-5" />} />
-      </section>
+      {/* 🔹 Header actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <Button
+          size="sm"
+          onClick={() =>
+            setSelectedDate(
+              new Date().toLocaleDateString("en-CA")
+            )
+          }
+        >
+          Go to Today
+        </Button>
 
-      {/* Today's Bookings Panel */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-4 sm:p-6">
-          {/* Date Navigation */}
-          <div className="flex items-center justify-between border-b pb-4 mb-4">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon">
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-blue-600" />
-                Today’s Bookings
-                {/* shoud be date today */}
-              </h2>
-
-              <Button variant="ghost" size="icon">
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </div>
-
-            <Button size="sm"
-            >
-              Go to Today
-            </Button>
-          </div>
-
-          {/* Booking List */}
-          <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-            {todayBookings.map((booking) => (
-              <BookingItem key={booking.id} booking={booking} />
-            ))}
-          </div>
-        </Card>
-        <ChartAreaInteractive/>
-      </section>
-    </div>
-  );
-}
-
-function StatCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
-  return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">
-          {title}
-        </CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function BookingItem({ booking }: { booking: any }) {
-  return (
-    <div className="flex items-center justify-between p-3 rounded-lg border bg-zinc-50 dark:bg-zinc-800">
-      <div>
-        <p className="font-medium">{booking.court}</p>
-        <p className="text-sm text-zinc-500">
-          {booking.time} • {booking.name}
-        </p>
+        {/* 🔍 Search bar */}
+        <Input
+          placeholder="Search by client name…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="sm:max-w-xs"
+        />
       </div>
 
-      <span
-        className={`px-3 py-1 text-xs font-semibold rounded-full ${booking.status === "Booked"
-          ? "bg-red-100 text-red-700"
-          : "bg-green-100 text-green-700"
-          }`}
-      >
-        {booking.status}
-      </span>
+      {/* 🔹 TOP ROW */}
+<section
+  className="
+    relative
+    grid grid-cols-1 lg:grid-cols-3
+    rounded-xl
+    overflow-hidden
+    min-h-[420px]
+  "
+>
+  {/* Animated background */}
+  <AnimatedBackground />
+
+  {/* Branding */}
+  <div className="relative z-10 hidden lg:flex flex-col justify-center px-6 text-white">
+    <h1 className="text-2xl font-bold">
+      Pickleball Reservation Booking
+    </h1>
+    <p className="mt-2 text-sm opacity-90">Admin Dashboard</p>
+    <p className="mt-6 text-xs opacity-70">
+      by Converge IT Solutions, Inc.
+    </p>
+  </div>
+
+  {/* White panel */}
+  <div className="relative z-10 bg-white p-4 lg:col-span-2">
+    <div className="grid grid-cols-1 lg:grid-cols-2">
+      <BookingCalendar onDateSelect={setSelectedDate} />
+      <TransactionList date={selectedDate} search={search} />
+    </div>
+  </div>
+</section>
+
+
+
+      {/* 🔹 Charts */}
+      <ChartAreaInteractive />
     </div>
   );
 }

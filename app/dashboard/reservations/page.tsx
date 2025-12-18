@@ -48,7 +48,8 @@ export default function ReservationPage() {
       </section>
 
       {/* Reservation List */}
-      <section className="grid grid-cols-1 gap-3">
+    <section className="relative grid grid-cols-1 lg:grid-cols-3 rounded-xl overflow-hidden min-h-[420px]">
+
         {reservations.map(reservation => (
           <ReservationCard key={reservation.id} reservation={reservation} />
         ))}
