@@ -1,124 +1,87 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
+import { DataTable } from "@/components/ui/data-table"
+import { columns, Transaction } from "@/components/ui/columns"
 
-type Transaction = {
-  id: string;
-  amountInCentavos: number;
-  status: string;
-  createdAt: string;
-  clientName?: string;
-  userName?: string;
-  user?: {
-    name?: string;
-  };
-};
-
-export function TransactionList({
+export function TransactionTable({
   date,
   search,
 }: {
-  date: string | null;
-  search: string;
+  date: string | null
+  search: string
 }) {
-  const [data, setData] = React.useState<Transaction[]>([]);
-  const [loading, setLoading] = React.useState(false);
+  const [data, setData] = React.useState<Transaction[]>([])
+  const [loading, setLoading] = React.useState(false)
 
   React.useEffect(() => {
     if (!date) {
-      setData([]);
-      return;
+      setData([])
+      return
     }
 
-    const token = localStorage.getItem("admin_access");
-    if (!token) return;
+    const token = localStorage.getItem("admin_access")
+    if (!token) return
 
-    setLoading(true);
+    setLoading(true)
 
     fetch(
-      `http://127.0.0.1:8000/api/admin/transactions/?date=${date}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/transactions-by-reservation-date/?date=${date}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
     )
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch")
+        return res.json()
+      })
       .then(setData)
       .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [date]);
+      .finally(() => setLoading(false))
+  }, [date])
 
   const filtered = React.useMemo(() => {
-    if (!search) return data;
+    if (!search) return data
 
-    const q = search.toLowerCase();
+    const q = search.toLowerCase()
 
-    return data.filter(tx => {
-      const name =
-        tx.clientName ||
-        tx.userName ||
-        tx.user?.name ||
-        "";
-
-      return name.toLowerCase().includes(q);
-    });
-  }, [data, search]);
+    return data.filter(tx =>
+      `${tx.firstName} ${tx.lastName}`
+        .toLowerCase()
+        .includes(q)
+    )
+  }, [data, search])
 
   if (!date) {
     return (
       <p className="text-sm text-muted-foreground">
-        Select a date to view transactions
+        Select a date to view reservations
       </p>
-    );
+    )
   }
 
   if (loading) {
-    return <p>Loading transactions…</p>;
-  }
-
-  if (filtered.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No matching transactions found
+        Loading reservations…
       </p>
-    );
+    )
   }
 
   return (
-    <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-        <div>June 3, 2025</div>
-      {filtered.map(tx => (
-        <TransactionItem key={tx.id} tx={tx} />
-      ))}
+    <div className="space-y-3">
+      {/* <h3 className="text-sm font-semibold">
+    
+        {new Date(date).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })}
+      </h3> */}
+
+      <DataTable columns={columns} data={filtered} />
     </div>
-  );
+  )
 }
-function TransactionItem({ tx }: { tx: Transaction }) {
-  return (
-    <div
-   
-    >
-      <div>
-        <p className="font-medium text-sm">
-          7:30am – 10:00am
-        </p>
-
-        <p className="text-xs text-zinc-300">
-          Froilan Dave E. Espinosa | 09682446524
-        </p>
-      </div>
-
-      <span
-        className={`px-3 py-1 text-xs font-semibold rounded-full ${
-          tx.status === "paid"
-            ? "bg-green-500/20 text-green-300"
-            : "bg-yellow-500/20 text-yellow-300"
-        }`}
-      >
-        {tx.status}
-      </span>
-    </div>
-  );
-}
-
