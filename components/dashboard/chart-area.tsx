@@ -28,38 +28,60 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-const chartData = [
-  { date: "2024-01-01", reservations: 12 },
-  { date: "2024-02-01", reservations: 18 },
-  { date: "2024-03-01", reservations: 25 },
-  { date: "2024-04-01", reservations: 21 },
-  { date: "2024-05-01", reservations: 32 },
-  { date: "2024-06-01", reservations: 41 },
-]
+type ChartPoint = {
+  date: string
+  transactions: number
+  reservationMinutes: number
+}
 
 const chartConfig = {
-  reservations: {
+  transactions: {
+    label: "Transactions",
+    color: "hsl(262 80% 60%)", // violet
+  },
+  reservationMinutes: {
     label: "Reservations",
-    color: "var(--chart-1)",
+    color: "hsl(25 95% 55%)", // orange
   },
 } satisfies ChartConfig
 
 export function ChartAreaInteractive() {
-  const [range, setRange] = React.useState("6m")
+  const [range, setRange] = React.useState<"1m" | "3m" | "6m">("6m")
+  const [data, setData] = React.useState<ChartPoint[]>([])
+
+  React.useEffect(() => {
+    const token = localStorage.getItem("admin_access")
+    if (!token) return
+
+    fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/activity-chart/?range=${range}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load chart data")
+        return res.json()
+      })
+      .then(setData)
+      .catch(console.error)
+  }, [range])
 
   return (
     <Card>
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Monthly Reservations</CardTitle>
+          <CardTitle>Activity Overview</CardTitle>
           <CardDescription>
-            Total pickleball court bookings
+            Transactions vs reservation load over time
           </CardDescription>
         </div>
 
-        <Select value={range} onValueChange={setRange}>
+        <Select value={range} onValueChange={v => setRange(v as any)}>
           <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Select range" />
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="6m">Last 6 months</SelectItem>
@@ -70,21 +92,33 @@ export function ChartAreaInteractive() {
       </CardHeader>
 
       <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="h-[260px] w-full"
-        >
-          <AreaChart data={chartData}>
+        <ChartContainer config={chartConfig} className="h-[280px] w-full">
+          <AreaChart data={data}>
             <defs>
-              <linearGradient id="fillReservations" x1="0" y1="0" x2="0" y2="1">
+              {/* Transactions */}
+              <linearGradient id="fillTransactions" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-reservations)"
+                  stopColor="var(--color-transactions)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-reservations)"
+                  stopColor="var(--color-transactions)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+
+              {/* Reservations */}
+              <linearGradient id="fillReservations" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-reservationMinutes)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-reservationMinutes)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -97,9 +131,10 @@ export function ChartAreaInteractive() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("en-US", {
+              tickFormatter={(v) =>
+                new Date(v).toLocaleDateString("en-US", {
                   month: "short",
+                  day: "numeric",
                 })
               }
             />
@@ -108,9 +143,10 @@ export function ChartAreaInteractive() {
               cursor={false}
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) =>
-                    new Date(value).toLocaleDateString("en-US", {
+                  labelFormatter={(v) =>
+                    new Date(v).toLocaleDateString("en-US", {
                       month: "long",
+                      day: "numeric",
                       year: "numeric",
                     })
                   }
@@ -118,11 +154,20 @@ export function ChartAreaInteractive() {
               }
             />
 
+            {/* 🟣 Transactions */}
             <Area
-              dataKey="reservations"
-              type="natural"
+              dataKey="transactions"
+              type="monotone"
+              stroke="var(--color-transactions)"
+              fill="url(#fillTransactions)"
+            />
+
+            {/* 🟠 Reservations (minutes) */}
+            <Area
+              dataKey="reservationMinutes"
+              type="monotone"
+              stroke="var(--color-reservationMinutes)"
               fill="url(#fillReservations)"
-              stroke="var(--color-reservations)"
             />
 
             <ChartLegend content={<ChartLegendContent />} />
